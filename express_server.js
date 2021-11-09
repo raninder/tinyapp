@@ -42,7 +42,15 @@ app.get("/urls/:shortURL", (req, res) => {
 //redirect user to lorngURL when shorURL clicked
 app.get("/u/:shortURL", (req, res) => {
     const longURL = urlDatabase[req.params.shortURL];
-    res.redirect("https://" + longURL);
+    res.status(300).redirect("https://" + longURL);
+});
+//POST /urls/:shortURL/delete
+//delete shortURLs
+app.post("/urls/:shortURL/delete", (req, res) => {
+    const shortURL = req.params.shortURL;
+    delete urlDatabase[shortURL];
+    const templateVars = { urls: urlDatabase };
+    res.render("urls_index", templateVars);
 });
 
 app.listen(PORT, () => {
