@@ -26,19 +26,19 @@
       <tbody>
         
         <% for(let url in urls) { %>
-          <tr>
+         <tr>
             
             <td><%= url %></td>
             <td><%= urls[url].longURL %></td>
-           <!---- <td><%= urls[url].userID %></td> -->
             <td> <form method="POST" action="/urls/<%=url%>/delete"><button type = "submit"> Delete </button></form></td>
             <td> <form method="GET" action="/urls/<%=url %>"><button type = "submit" > Edit </button></form></td>
-          </tr><tr></tr>
-            
+          </tr>
+          
           
         <% } %>
+  
         <tr><a href = "/urls/new" >Create a New Short Link</a></tr>
-       
+      
         </tbody>
     
         
