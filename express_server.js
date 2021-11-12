@@ -3,6 +3,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcryptjs');
 const { response } = require("express");
 
 
@@ -87,7 +88,7 @@ const urlsForUser = (userID) => {
 //display all short and long urls stored in url database
 app.get("/urls", (req, res) => {
     const userID = req.cookies["user_id"];
-    console.log("id",userID);
+    //console.log("id",userID);
     const userEmailId = getUserEmail(userID, users);
 
     let urlUser = urlsForUser(userID);
@@ -97,7 +98,7 @@ app.get("/urls", (req, res) => {
         urls: urlUser,
         useremail: userEmailId
     };
-    console.log("tt",templateVars);
+    //console.log("tt",templateVars);
     if (urlUser) {
         
         res.render("urls_index", templateVars);
@@ -112,8 +113,8 @@ app.get("/urls", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
     const userID = req.cookies["user_id"];
     const userEmailId = getUserEmail(userID, users);
-    console.log(req.params.shortURL);
-    console.log(urlDatabase);
+    //console.log(req.params.shortURL);
+    //console.log(urlDatabase);
     if (userEmailId) {
         const templateVars = {
             user_id: userID,
@@ -157,10 +158,10 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 //Edit longURL for a given shortURL
 app.post("/urls/:shortURL", (req, res) => {
     const longURL = req.body.longURL;
-    console.log("longurl",longURL);
+    //console.log("longurl",longURL);
     const shortURL = req.params.shortURL;
     const userID = req.cookies["user_id"];
-    console.log(urlDatabase[shortURL],longURL);
+    //console.log(urlDatabase[shortURL],longURL);
     if (userID) {
         urlDatabase[shortURL] = { longURL, userID };
         res.redirect('/urls');
@@ -184,9 +185,10 @@ app.post("/login", (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
     const user = getUserByEmail(email, users);
-
+    const success = bcrypt.compareSync(password, users[user].password); 
+    
     if (user) {
-        if (users[user].password !== password) {
+        if (!success) {
             res.send({ error: '403 Password doesnt match' });
         }
         res.cookie('user_id', users[user].id);
@@ -214,14 +216,17 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
     const id = generateRandomString();
     const email = req.body.email;
-    const password = req.body.password;
     const user = getUserByEmail(email, users);
+    const password = req.body.password;
+    const hashed = bcrypt.hashSync(password, 10);
+    //console.log(password, hashedPassword);
 
     if(user) {
         return res.status(400).send({ error: '404 Email already exists' });
     }
-    const newUser = { id, email, password };
+    const newUser = { id, email, password: hashed };
     users[id] = newUser;
+    console.log("new",users);
     res.redirect("/urls/");
 });
 
