@@ -5,16 +5,16 @@ TinyApp is a full stack web application built with Node and Express that allows 
 ## Final Product
 
 - Register page allow new user to register.
-!["Register"](register.png)
+!["Register"](docs/register.png)
 
 - Login Page which allow user to login if registerd.
-!["Login"](login.png)
+!["Login"](docs/login.png)
 
 - Displays short URLs corresponding to Long URLs alonwith options to Delete and Edit URLs.
-!["Short-urls"](short-URLs.png)
+!["Short-urls"](docs/short-URLs.png)
 
 - Allows user to edit longURL for a given shortURL.
-!["Edit"](edit.png)
+!["Edit"](docs/edit.png)
 
 - There are many validation checks also that displays errors when unauthenticated user tries to make changes.
 
