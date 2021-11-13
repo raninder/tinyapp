@@ -37,7 +37,6 @@ app.get("/urls/new", (req, res) => {
         user_id: userID,
         useremail: userEmailId
     };
-
     //check if user logged in
     if (userEmailId) {
         res.render("urls_new", templateVars);
@@ -58,7 +57,7 @@ app.post("/urls", (req, res) => {
         longURL: longURL,
         userID: userID
     };
-    res.redirect(`/urls/${shortURL}`);
+    res.redirect('/urls');
 });
 
 //create a new DB, if users DB id matches with url DB id
@@ -85,15 +84,11 @@ app.get("/urls", (req, res) => {
         urls: urlUser,
         useremail: userEmailId
     };
-    console.log("templatevars",templateVars);
 
     //user only displaying urls for own
-    if (urlUser) {
+    
         res.render("urls_index", templateVars);
-    }
-    else {
-        res.send("Please login first");
-    }
+    
 });
 
 
@@ -184,7 +179,7 @@ app.post("/urls/:shortURL", (req, res) => {
 
 app.get("/login", (req, res) => {
     const userID = req.session.user_id;
-
+    console.log("login");
     if (!userID) {
         const templateVars = {
             useremail: null   //pass useremail as null to headers 
@@ -244,7 +239,7 @@ app.get("/register", (req, res) => {
     }
 });
 
-// add new user to users database
+// add new user in users database
 app.post("/register", (req, res) => {
     const id = generateRandomString();
     const email = req.body.email;
@@ -259,8 +254,8 @@ app.post("/register", (req, res) => {
         return res.status(400).send({ error: '400 Email already exists' });
     }
     const newUser = { id, email, password: hashed };
-    console.log("newuser", newUser);
     users[id] = newUser;
+    req.session.user_id = newUser.id;
     res.redirect('/urls');
 });
 
