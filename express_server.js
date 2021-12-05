@@ -38,12 +38,12 @@ app.get("/urls/new", (req, res) => {
         useremail: userEmailId
     };
     //check if user logged in
-    if (userEmailId) {
-        res.render("urls_new", templateVars);
+    if (!userID) {
+        return res.redirect('/login');
     }
-    else {
-        res.send("login first");
-    }
+    res.render("urls_new", templateVars);
+
+
 });
 
 //creating a database of shortURLs and longURLs 
@@ -53,11 +53,18 @@ app.post("/urls", (req, res) => {
     const longURL = req.body.longURL;
     const userID = req.session.user_id;
 
-    urlDatabase[shortURL] = {
-        longURL: longURL,
-        userID: userID
-    };
+    // urlDatabase[shortURL] = {
+    //     longURL: longURL,
+    //     userID: userID
+    // };
+    if (longURL.includes('https://')) {
+        urlDatabase[shortURL] = { longURL, userID };
+    } else {
+        urlDatabase[shortURL] = { longURL: `https://${longURL}`, userID };
+    }
+    console.log("urlDatabase", urlDatabase[shortURL]);
     res.redirect('/urls');
+    //res.redirect(`/urls/${shortURL}`);
 });
 
 //create a new DB, if users DB id matches with url DB id
@@ -70,25 +77,27 @@ const urlsForUser = (userID) => {
             userDB[key] = { longURL, userID };
         }
     }
+    console.log("userdb", userDB);
     return userDB;
 };
 
 //display all short and long urls stored in url database for logged user
 app.get("/urls", (req, res) => {
-    const userID = req.session.user_id;
-    const userEmailId = getUserEmail(userID, users);
-    let urlUser = urlsForUser(userID);
+    const user_id = req.session.user_id;
+    const userEmailId = getUserEmail(user_id, users);
+    let urlUser = urlsForUser(user_id);
 
+    //const templateVars = { users, user_id, urlUser };
     const templateVars = {
-        user_id: userID,
+        user_id: user_id,
         urls: urlUser,
         useremail: userEmailId
     };
 
     //user only displaying urls for own
-    
-        res.render("urls_index", templateVars);
-    
+
+    res.render("urls_index", templateVars);
+
 });
 
 
@@ -121,7 +130,7 @@ app.get("/u/:shortURL", (req, res) => {
     const shortURL = req.params.shortURL;
     const longURL = urlDatabase[req.params.shortURL].longURL;
     const reg = new RegExp('([a-zA-Z\d]+://)?((\w+:\w+@)?([a-zA-Z\d.-]+\.[A-Za-z]{2,4})(:\d+)?(/.*)?)', 'i')
-    
+
     //check if url is valid
     if (reg.test(longURL)) {
         res.redirect(`https://${longURL}`);
@@ -171,7 +180,11 @@ app.post("/urls/:shortURL", (req, res) => {
     if (!urlUser) {
         return res.send(" Error: You can not edit");
     }
-    urlDatabase[shortURL] = { longURL, userID };
+    if (!longURL.includes('https://')) {
+        urlDatabase[shortURL] = { longURL: `https://${longURL}`, userID };
+    } else {
+        urlDatabase[shortURL] = { longURL, userID };
+    }
     res.redirect('/urls');
 });
 
@@ -210,7 +223,7 @@ app.post('/login', (req, res) => {
         if (!success) {
             return res.status(400).send('password does not match')
         }
-      
+
         // telling the browswer to set this cookie
         req.session.user_id = user.id;
         res.redirect('/urls');
@@ -232,11 +245,10 @@ app.get("/register", (req, res) => {
         useremail: null //pass useremail as null to partial/_headers 
     }
     if (userID) {
-        res.redirect('/urls');
+        return res.redirect('/urls');
     }
-    else {
-        res.render("user_register", templateVars);
-    }
+    res.render("user_register", templateVars);
+
 });
 
 // add new user in users database
@@ -255,7 +267,6 @@ app.post("/register", (req, res) => {
     }
     const newUser = { id, email, password: hashed };
     users[id] = newUser;
-    req.session.user_id = newUser.id;
     res.redirect('/urls');
 });
 
