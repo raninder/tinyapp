@@ -53,18 +53,12 @@ app.post("/urls", (req, res) => {
     const longURL = req.body.longURL;
     const userID = req.session.user_id;
 
-    // urlDatabase[shortURL] = {
-    //     longURL: longURL,
-    //     userID: userID
-    // };
-    if (longURL.includes('https://')) {
-        urlDatabase[shortURL] = { longURL, userID };
-    } else {
-        urlDatabase[shortURL] = { longURL: `https://${longURL}`, userID };
-    }
-    console.log("urlDatabase", urlDatabase[shortURL]);
+    urlDatabase[shortURL] = {
+        longURL: longURL,
+        userID: userID
+    };
     res.redirect('/urls');
-    //res.redirect(`/urls/${shortURL}`);
+
 });
 
 //create a new DB, if users DB id matches with url DB id
@@ -133,7 +127,7 @@ app.get("/u/:shortURL", (req, res) => {
 
     //check if url is valid
     if (reg.test(longURL)) {
-        res.redirect(`https://${longURL}`);
+        res.redirect(`http://${longURL}`);
     }
     else {
         res.send("Error: not valid url");
@@ -180,11 +174,7 @@ app.post("/urls/:shortURL", (req, res) => {
     if (!urlUser) {
         return res.send(" Error: You can not edit");
     }
-    if (!longURL.includes('https://')) {
-        urlDatabase[shortURL] = { longURL: `https://${longURL}`, userID };
-    } else {
-        urlDatabase[shortURL] = { longURL, userID };
-    }
+    urlDatabase[shortURL] = { longURL, userID };
     res.redirect('/urls');
 });
 
@@ -267,6 +257,7 @@ app.post("/register", (req, res) => {
     }
     const newUser = { id, email, password: hashed };
     users[id] = newUser;
+    req.session.user_id = id;
     res.redirect('/urls');
 });
 
