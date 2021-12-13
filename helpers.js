@@ -8,6 +8,20 @@ const getUserByEmail = (email, users) => {
     }
 }
 
+//create a new DB, if users DB id matches with url DB id
+const urlsForUser = (urlDatabase,userID) => {
+    const userDB = {};
+    for (const key in urlDatabase) {
+        if (urlDatabase[key].userID === userID) {
+            const longURL = urlDatabase[key].longURL;
+            const userID = urlDatabase[key].userID
+            userDB[key] = { longURL, userID };
+        }
+    }
+
+    return userDB;
+};
+
 //get user email for a given userid
 const getUserEmail = (userID, users) => {
     for (let key in users) {
@@ -22,4 +36,4 @@ const generateRandomString = () => {
     return Math.random().toString(36).slice(2, 8);
     
 }
-module.exports = { getUserByEmail, getUserEmail,generateRandomString };
+module.exports = { getUserByEmail, urlsForUser,getUserEmail,generateRandomString };
