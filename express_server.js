@@ -68,8 +68,8 @@ app.post("/urls", (req, res) => {
         longURL: longURL,
         userID: userID
     };
-    res.redirect(`/urls`);
-    //res.redirect(`/urls/${shortURL}`);
+    // res.redirect(`/urls`);
+    res.redirect(`/urls/${shortURL}`);
 });
 
 //create new url
