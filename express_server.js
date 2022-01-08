@@ -64,10 +64,11 @@ app.post("/urls", (req, res) => {
     const longURL = req.body.longURL;
     const userID = req.session.user_id;
 
-    urlDatabase[shortURL] = {
-        longURL: longURL,
-        userID: userID
-    };
+    if ((longURL.includes('https://'))||(longURL.includes('http://'))) {
+    urlDatabase[shortURL] = { longURL, userID };
+  } else {
+    urlDatabase[shortURL] = { longURL: `https://${longURL}`, userID };
+  }
     // res.redirect(`/urls`);
     res.redirect(`/urls/${shortURL}`);
 });
@@ -111,6 +112,7 @@ app.get("/urls/:shortURL", (req, res) => {
     res.render("urls_show", templateVars);
 });
 
+
 //redirect user to longURL when shorURL clicked
 app.get("/u/:shortURL", (req, res) => {
     const shortURL = req.params.shortURL;
@@ -120,7 +122,9 @@ app.get("/u/:shortURL", (req, res) => {
     if (!urlDatabase[shortURL]) {
         return res.status(404).send(`We can't find the shortURL`);
     }
-    res.redirect(`http://${longURL}`);
+    // res.redirect(`http://${longURL}`);
+     res.redirect(longURL);
+    
 
 });
 
@@ -147,16 +151,21 @@ app.post("/urls/:shortURL", (req, res) => {
     const shortURL = req.params.shortURL;
     const userID = req.session.user_id;
     let urlUser = urlsForUser(urlDatabase,userID);
-
+    
+    if(userID !== urlDatabase[shortURL].userID){
+        return res.send(" Error: You can not edit");
+    }
+    
     //error if user not logged in
     if (!userID) {
         return res.send("Login First");
     }
-    //error if url not belongs to user
-    if (!urlUser) {
-        return res.send(" Error: You can not edit");
-    }
+    
+    if ((!longURL.includes('https://'))|| (!longURL.includes('http://'))){
+    urlDatabase[shortURL] = { longURL: `https://${longURL}`, userID };
+  } else {
     urlDatabase[shortURL] = { longURL, userID };
+  }  
     res.redirect('/urls');
 });
 
