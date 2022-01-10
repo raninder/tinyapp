@@ -64,6 +64,11 @@ app.post("/urls", (req, res) => {
     const longURL = req.body.longURL;
     const userID = req.session.user_id;
 
+    if (!userID) {
+        return res.status(401)
+          .send(`You are unauthorized, You must <a href='/login'>login</a> first`);
+      }
+
     if ((longURL.includes('https://'))||(longURL.includes('http://'))) {
     urlDatabase[shortURL] = { longURL, userID };
   } else {
